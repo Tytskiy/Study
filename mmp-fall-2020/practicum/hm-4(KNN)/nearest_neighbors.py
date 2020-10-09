@@ -15,8 +15,7 @@ class NearestNeighborsCustom:
     def fit(self, X):
         self.X = X
 
-    def kneighbors(self, X, n_neighbors=5,
-                   return_distance=True, kind="mergesort"):
+    def kneighbors(self, X, n_neighbors=5, return_distance=True, kind="mergesort"):
 
         mat_pairwise = NearestNeighborsCustom.distance[self.metric](X, self.X)
         arg_sort = np.argsort(mat_pairwise, axis=1, kind=kind)
@@ -30,8 +29,8 @@ class NearestNeighborsCustom:
 
 
 class KNNClassifier:
-    def __init__(self, k=5, strategy="my_own",
-                 metric="euclidean", weights=False, test_block_size=None):
+    def __init__(self, k=5, strategy="my_own", metric="euclidean", weights=False,
+                 test_block_size=None):
         self.k = k
         self.strategy = strategy
         self.metric = metric
@@ -57,21 +56,17 @@ class KNNClassifier:
         if return_distance:
             mat_pairwise = np.empty((X.shape[0], self.k))
 
-        # люблю --max_length_size=79 pep8
-        love_pep = self.block_size
-        for i in range(love_pep, X.shape[0] + love_pep, love_pep):
+        for i in range(0, X.shape[0], self.block_size):
 
             if return_distance:
-                tmp1, tmp2 = self.NN.kneighbors(
-                    X[i - love_pep: i, :],
-                    n_neighbors=self.k, return_distance=return_distance)
-                mat_pairwise[i - love_pep: i, :] = tmp1
-                mat_indexs[i - love_pep: i, :] = tmp2
+                tmp1, tmp2 = self.NN.kneighbors(X[i: i+self.block_size, :],
+                                                n_neighbors=self.k, return_distance=return_distance)
+                mat_pairwise[i: i+self.block_size, :] = tmp1
+                mat_indexs[i: i+self.block_size, :] = tmp2
             else:
-                tmp = self.NN.kneighbors(
-                    X[i - love_pep: i, :],
-                    n_neighbors=self.k, return_distance=return_distance)
-                mat_indexs[i - love_pep: i, :] = tmp
+                tmp = self.NN.kneighbors(X[i: i+self.block_size, :],
+                                         n_neighbors=self.k, return_distance=return_distance)
+                mat_indexs[i: i+self.block_size, :] = tmp
 
         if return_distance:
             return mat_pairwise, mat_indexs.astype(int)
@@ -85,8 +80,7 @@ class KNNClassifier:
             # кода мне кажется неоптимальной по памяти
             del mat_pairwise
 
-            labels = np.apply_along_axis(
-                lambda x: self.y[x], arr=mat_indexs, axis=1)
+            labels = np.apply_along_axis(lambda x: self.y[x], arr=mat_indexs, axis=1)
 
             uniq_y = np.unique(self.y)
             tmp_tensor = labels[:, :, np.newaxis] == uniq_y.reshape(1, 1, -1)
@@ -95,8 +89,6 @@ class KNNClassifier:
             predict = uniq_y[tmp_tensor.sum(axis=1).argmax(axis=1)]
         else:
             mat_indexs = self.find_kneighbors(X, return_distance=False)
-            labels = np.apply_along_axis(
-                lambda x: self.y[x], arr=mat_indexs, axis=1)
-            predict = np.apply_along_axis(
-                lambda x: np.bincount(x).argmax(), axis=1, arr=labels)
+            labels = np.apply_along_axis(lambda x: self.y[x], arr=mat_indexs, axis=1)
+            predict = np.apply_along_axis(lambda x: np.bincount(x).argmax(), axis=1, arr=labels)
         return predict

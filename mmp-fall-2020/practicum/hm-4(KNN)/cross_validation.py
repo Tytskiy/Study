@@ -39,8 +39,7 @@ def knn_cross_val_score(X, y, k_list, cv=None, score="accuracy", **kwargs):
         else:
             mat_indexs = model.find_kneighbors(X[test], return_distance=False)
 
-        labels = np.apply_along_axis(lambda x: y[train][x],
-                                     arr=mat_indexs, axis=1)
+        labels = np.apply_along_axis(lambda x: y[train][x], arr=mat_indexs, axis=1)
         for k in k_list:
             if k_neigh.get(k, None) is None:
                 k_neigh[k] = []

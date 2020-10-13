@@ -5,7 +5,8 @@ __pycache__/
 
 # user settings 
 .vscode
-figures/wrong*/
+#temp settings 
+wrong*/
 #latex
 *.aux
 *.fls

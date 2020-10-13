@@ -5,7 +5,13 @@ __pycache__/
 
 # user settings 
 .vscode
-
+figures/
+#latex
+*.aux
+*.fls
+*.out
+*.fdb_latexmk
+*.gz
 # C extensions
 *.so
 

@@ -15,16 +15,15 @@ class NearestNeighborsCustom:
     def fit(self, X):
         self.X = X
 
-    def kneighbors(self, X, n_neighbors=5, return_distance=True, kind="mergesort"):
+    def kneighbors(self, X, n_neighbors=5, return_distance=True, kind="quicksort"):
 
         mat_pairwise = NearestNeighborsCustom.distance[self.metric](X, self.X)
         arg_sort = np.argsort(mat_pairwise, axis=1, kind=kind)
 
-        mat_pairwise = np.sort(mat_pairwise, axis=1, kind=kind)
-        mat_pairwise = mat_pairwise[:, : n_neighbors]
-
         if return_distance:
-            return mat_pairwise, arg_sort[:, :n_neighbors]
+            mat_pairwise = np.take_along_axis(mat_pairwise, arg_sort, axis=1)
+            #mat_pairwise = np.sort(mat_pairwise, axis=1, kind=kind)
+            return mat_pairwise[:, : n_neighbors], arg_sort[:, :n_neighbors]
         return arg_sort[:, :n_neighbors]
 
 
@@ -42,15 +41,13 @@ class KNNClassifier:
             self.NN = NearestNeighborsCustom(metric=self.metric)
         else:
             self.NN = NearestNeighbors(
-                n_neighbors=self.k, algorithm=self.strategy,
-                metric=self.metric)
+                n_neighbors=self.k, algorithm=self.strategy, metric=self.metric)
         self.NN.fit(X)
         self.y = y
 
     def find_kneighbors(self, X, return_distance=True):
         if self.block_size is None:
-            return self.NN.kneighbors(
-                X, n_neighbors=self.k, return_distance=return_distance)
+            return self.NN.kneighbors(X, n_neighbors=self.k, return_distance=return_distance)
 
         mat_indexs = np.empty((X.shape[0], self.k))
         if return_distance:

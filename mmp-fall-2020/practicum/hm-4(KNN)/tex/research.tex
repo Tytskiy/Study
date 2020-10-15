@@ -263,7 +263,71 @@ Sklearn метод, реализующих поиск соседей не под
     \label{rotate}
 \end{table}
 
+
 \section{Задание №5}
+Попробуем улучшить качество нашей модели с помощью аугментации. Подберем по кросс-валидации лучшие 
+параметры преобразований изображений среди ниже перечисленных:
+\begin{itemize}
+    \item rotate deg -- -15, -10, -5, 0, 5, 10, 15
+    \item gauss $\sigma$ -- 0.5, 1.0, 1.5
+    \item shift px - -3, -2, -1, 0, 1, 2, 3
+\end{itemize}
+
+Кроссвалидация проводилась на подвыборке размером 40000.
+В результате отобра лучшие параметры получились (см. Таблица \ref{best_param})
+
+\begin{table}[htb]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+    \hline
+    $base$  & $rotate, \pm10deg$ & $gauss, \sigma=1$ & $shift\_x, \pm1px$ & $shift\_y ,\pm 1px$ \\ \hline
+    0.968 & 0.976          & 0.976       & 0.972      & 0.974   \\ \hline
+    \end{tabular}
+    \caption{лучшие параметры}
+    \label{best_param}
+\end{table}
+
+В виду объемности датасета, применим к исходной обучающей выборке Гауссов фильтр и поворот на 10 градусов(можно было взять и -10).
+В результате получим обучающую выборку размером 180000.
+
+\newpage
+\textbf{Точность на тесте: 0.9835}
+
+Взглянем на матрицу ошибок после агументации(Таблица \ref{conf_matrix_aug}):
+
+\begin{table}[htb]
+    \centering
+    \tabcolsep = -15pt
+    \begin{tabular}{cc}
+        \includegraphics[width=10cm]{task4.pdf} & \includegraphics[width=10cm]{task5_conf_mat.pdf}\\
+        до агументации & после агументации 
+    \end{tabular}
+    \caption{Изменение матрицы ошибок после аугментции}
+    \label{conf_matrix_aug}
+\end{table}
+
+Даже визуально видно, что ошибок стало меньше. Рассмотрим подробнее те объекты, 
+на которых справился улучшенный алгоритм, а обычный нет(Таблица \ref{base_vs_aug_obj}):
+
+%\newcommand\x{2}
+\begin{table}[htb]
+    \tabcolsep = -5pt
+    \begin{tabular}{lccccccccc}
+        \textbf{picture}       & \includegraphics[width=\x cm]{wrong_base_vs_aug/digit_1_2_5099.pdf}   &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_2_1_1650.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_2_4_385.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_5_6_4233.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_7_9_9901.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_8_3_3535.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_9_4_3297.pdf}  &\includegraphics[width=\x cm]{wrong_base/digit_9_4_5741.pdf}  &\includegraphics[width=\x cm]{wrong_base/digit_9_7_760.pdf}  \\
+        \textbf{true label}    & 1 & 2 & 2 & 5 & 7 & 8 & 9 & 9 & 9 \\
+        \textbf{predict (base)} & 2  & 1 & 4 & 6 & 9 & 3 & 4 & 4 & 7 
+   
+    \end{tabular}
+    \caption{Объекты, которые удалось правильно классифицировать}
+    \label{base_vs_aug_obj}
+ \end{table}
+
+Аугментация определенно помогает, увеличить качество, но можно заметить, что на некоторых клетках матрицы ошибок
+ значения стали больше. 
+В идеале к аугментации нужно подходить более ``умно'', возможно стоило бы размножить объекты из определенного класса или 
+научиться понимать в какую сторону лучше повернуть конкретный объект.
+
+\section{Задание №6}
 %\begin{thebibliography}{99}
 %    \bibitem{deformationmodels}Keysers D. et al. Deformation models for image recognition
 %    //IEEE Transactions on Pattern Analysis and Machine Intelligence.

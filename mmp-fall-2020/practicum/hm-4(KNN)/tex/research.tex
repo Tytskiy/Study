@@ -68,7 +68,7 @@
  MNIST - база данных рукописных цифр. Каждая цифра представляется в виде  черно-белого изображения  $28\times28$ пикселей,
   что эквивалентно вектору 
  $x \in \mathbb{R}^{784}$. Датасет содержит 70000 размеченных цифр. В данном исследовании мы будем использовать 
- обучающую выборку размера 60000, а тестовую соответсвенно 10000.
+ обучающую выборку размера 60000, а тестовую соответственно 10000.
  \footnote{В некоторых частях исследования будет использоваться уменьшенная выборка т.к. вычислительная 
  машина Тыцкого В.И. тяжело справляется с такой нагрузкой. Во всех случаях, где не оговаривается иное,
  будет использоваться полная выборка}
@@ -82,7 +82,7 @@ my\_own --- самописная реализация, которая вычис
 brute, kd\_tree, ball\_tree --- реализации поиска соседей из библиотеки sklearn.
 \subsection{Сравнение скорости работы}
 Так как описанные выше методы нахождения соседей являются детерминированными (100\% точными), то главным критерием 
-выбора одного из них для дальнеших исследований будет служить скорость работы.
+выбора одного из них для дальнейших исследований будет служить скорость работы.
 В случае MNIST важно знать как хорошо ведут себя алгоритмы в пространстве большой размерности $\mathbb{R}^{784}$. 
 
 Для экспериментов были выбраны подпространства размерности 10, 50 , 100.
@@ -98,10 +98,10 @@ brute, kd\_tree, ball\_tree --- реализации поиска соседей
     \label{pic1}
 \end{figure}
 
-Из графика время работы kd\_tree и ball\_tree с ростом размерности пространства увеличивается линейно.
+Время работы kd\_tree и ball\_tree с ростом размерности пространства увеличивается линейно.
 Это связано с принципами работы алгоритма и так явлением называемым ``Проклятие размерности''.
 Brute и my\_own имеют практически константое время работы алгортима, потому что основаны на простом построении матрицы 
-расстояний,  вычисление нормы разности $||x_i-x_j||$  по сравнению с построением матрицы имеет
+расстояний, и вычисление нормы разности $||x_i-x_j||$  по сравнению с построением матрицы имеет
 незначительное количество операций. 
 
 Далее везде будем использовать либо brute, либо my\_own 
@@ -164,10 +164,10 @@ Sklearn метод, реализующих поиск соседей не под
 \end{table}
 
 Можно сделать вывод, что метрика не влияет на скорость работы алгоритма. Это вполне логично ---
- обе реалзиции работают с асимптотикой $\Theta(n^{2.3727})$ (Алгоритм Копперсмита -- Винограда)
-\newpage
+ обе реализации работают с асимптотикой $\Theta(n^{2.3727})$ (Алгоритм Копперсмита -- Винограда)
+
 \section{Задание №4}
-Применим лучший алгоритм (cosine, k=5) для тестовой выборки размером 10000. 
+Применим лучший алгоритм (cosine, k=5).
 \textbf{Точность на тесте: 0.9771}
 
 \subsection{Сравнение с лучшими алгоритмами}
@@ -199,16 +199,16 @@ Sklearn метод, реализующих поиск соседей не под
     \label{table2}
 \end{table}
 
-Даже на бейзлайне мы получаем неплохие результаты. С accuracy 0.948 в таблице присутствует другой
+Даже с помощью базового мы получаем неплохие результаты. С accuracy 0.948 в таблице присутствует другой
 алгоритм KNN \cite{deformationmodels}
 
 
 \subsection{Ошибки алгоритма}
 
 Интересно взглянуть на каких именно объектах наша модель ошибалась. Для этого построим 
-матрицу ошибок(confusion matrix) (Рис.\ref{pic3}. Значения на диагонали убраны, в данном случае они нам неинтересны.
-\newpage
-\begin{figure}
+матрицу ошибок(confusion matrix) (Рис.\ref{pic3}). Значения на диагонали убраны, в данном случае они нам неинтересны.
+
+\begin{figure}[htb]
     \centering
     \includegraphics[width=12cm]{task4.pdf}
     \caption{Матрица ошибок}
@@ -216,7 +216,7 @@ Sklearn метод, реализующих поиск соседей не под
 \end{figure}
 
 Можно выделить самые главные причины ошибок - выбросы и непосредственно ошибки модели. Выбросы в данном случае - это такие объекты, 
-которые даже человеку будет тяжело распознать. Эту проблему невозможно исправить никакой моделью. В таблице (Таблица \ref{outlier}) нижже
+которые даже человеку будет тяжело распознать. Эту проблему невозможно исправить никакой моделью. В таблице (Таблица \ref{outlier}) ниже
 изображено несколько выбросов.
 
 \newcommand\x{2}
@@ -234,7 +234,7 @@ Sklearn метод, реализующих поиск соседей не под
 Рассмотрим ошибки модели. Некоторые из них можно было бы решить аугментацией. Расширив обучающую выборку путем изменения исходных объектов
 (поворот, размытие, сдвиг) мы могли бы лучше решать задачу классификации.
 
-В таблице (Таблица \ref{gauss}) изображены несколько обьектов, которые теоретически можно было классифицировать правильно, если бы мы 
+В таблице (Таблица \ref{gauss}) изображены несколько объектов, которые теоретически можно было классифицировать правильно, если бы мы 
 применили к ним фильтр Гаусса.
 \newcommand\y{3}
 \begin{table}[htb]
@@ -265,7 +265,7 @@ Sklearn метод, реализующих поиск соседей не под
 
 
 \section{Задание №5}
-Попробуем улучшить качество нашей модели с помощью аугментации. Подберем по кросс-валидации лучшие 
+Попробуем улучшить качество нашей модели с помощью аугментации обучающей выборки. Подберем по кросс-валидации лучшие 
 параметры преобразований изображений среди ниже перечисленных:
 \begin{itemize}
     \item rotate deg -- -15, -10, -5, 0, 5, 10, 15
@@ -273,7 +273,7 @@ Sklearn метод, реализующих поиск соседей не под
     \item shift px - -3, -2, -1, 0, 1, 2, 3
 \end{itemize}
 
-Кроссвалидация проводилась на подвыборке размером 40000.
+Кросс-валидация проводилась на подвыборке размером 40000.
 В результате отобра лучшие параметры получились (см. Таблица \ref{best_param})
 
 \begin{table}[htb]
@@ -287,38 +287,38 @@ Sklearn метод, реализующих поиск соседей не под
     \label{best_param}
 \end{table}
 
-В виду объемности датасета, применим к исходной обучающей выборке Гауссов фильтр и поворот на 10 градусов(можно было взять и -10).
+В виду объемности датасета, применим к исходной обучающей выборке только Гауссов фильтр и поворот на -10 градусов(можно было взять и 10).
 В результате получим обучающую выборку размером 180000.
 
 \newpage
-\textbf{Точность на тесте: 0.9835}
+\textbf{Точность на тесте: 0.9834}
 
-Взглянем на матрицу ошибок после агументации(Таблица \ref{conf_matrix_aug}):
+Взглянем на матрицу ошибок после аугментации(Таблица \ref{conf_matrix_aug}):
 
 \begin{table}[htb]
     \centering
     \tabcolsep = -15pt
     \begin{tabular}{cc}
         \includegraphics[width=10cm]{task4.pdf} & \includegraphics[width=10cm]{task5_conf_mat.pdf}\\
-        до агументации & после агументации 
+        до аугментации & после аугментации 
     \end{tabular}
-    \caption{Изменение матрицы ошибок после аугментции}
+    \caption{Изменение матрицы ошибок после аугментации}
     \label{conf_matrix_aug}
 \end{table}
 
-Даже визуально видно, что ошибок стало меньше. Рассмотрим подробнее те объекты, 
+Даже визуально видно -- ошибок стало меньше. Рассмотрим подробнее некоторые объекты, 
 на которых справился улучшенный алгоритм, а обычный нет(Таблица \ref{base_vs_aug_obj}):
 
 %\newcommand\x{2}
 \begin{table}[htb]
     \tabcolsep = -5pt
     \begin{tabular}{lccccccccc}
-        \textbf{picture}       & \includegraphics[width=\x cm]{wrong_base_vs_aug/digit_1_2_5099.pdf}   &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_2_1_1650.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_2_4_385.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_5_6_4233.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_7_9_9901.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_8_3_3535.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_9_4_3297.pdf}  &\includegraphics[width=\x cm]{wrong_base/digit_9_4_5741.pdf}  &\includegraphics[width=\x cm]{wrong_base/digit_9_7_760.pdf}  \\
+        \textbf{picture}       & \includegraphics[width=\x cm]{wrong_base_vs_aug/digit_1_2_5099.pdf}   &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_2_1_1650.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_2_4_385.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_5_6_4233.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_7_9_9901.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_8_3_3535.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_9_4_3297.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_9_4_5741.pdf}  &\includegraphics[width=\x cm]{wrong_base_vs_aug/digit_9_7_760.pdf}  \\
         \textbf{true label}    & 1 & 2 & 2 & 5 & 7 & 8 & 9 & 9 & 9 \\
-        \textbf{predict (base)} & 2  & 1 & 4 & 6 & 9 & 3 & 4 & 4 & 7 
-   
+        \textbf{predict (base)} & 2  & 1 & 4 & 6 & 9 & 3 & 4 & 4 & 7 \\
+        \textbf{helping transf.} & - & r & r & g & r & r & g & g+r & g
     \end{tabular}
-    \caption{Объекты, которые удалось правильно классифицировать}
+    \caption{Объекты, которые удалось правильно классифицировать(aug\_train)}
     \label{base_vs_aug_obj}
  \end{table}
 
@@ -328,10 +328,62 @@ Sklearn метод, реализующих поиск соседей не под
 научиться понимать в какую сторону лучше повернуть конкретный объект.
 
 \section{Задание №6}
-%\begin{thebibliography}{99}
-%    \bibitem{deformationmodels}Keysers D. et al. Deformation models for image recognition
-%    //IEEE Transactions on Pattern Analysis and Machine Intelligence.
-%     – 2007. – Т. 29. – №. 8. – С. 1422-1435.
-%\end{thebibliography}
+Агументацию можно проводить не только над обучающей выборкой, но и над тестовой. Для этого необходимо найти ближайших соседей 
+обыкновенной тестовой выборки, а также для преобразованной тестовой выборки. Далее можно поступить по-разному, но в данном случае
+среди двух наборов соседей будем искать k самых ближайших.
+По кросс-валидации на подвыборке 25000 лучшими оказались параметры $shift\_x=-1$ и $shift\_y = -1$.
 
+\textbf{Точность на тесте: 0.98}
+
+Взглянем на матрицу ошибок после агументации тестовой выборки(Таблица \ref{conf_matrix_aug_6})
+\begin{table}[htb]
+    \centering
+    \tabcolsep = -15pt
+    \begin{tabular}{ccc}
+        \includegraphics[width=7cm]{task4.pdf} & \includegraphics[width=7cm]{task5_conf_mat.pdf} & \includegraphics[width=7cm]{task6.pdf}\\
+        до агументации & после агументации train & после агументации test
+    \end{tabular}
+    \caption{Изменение матрицы ошибок после аугментции}
+    \label{conf_matrix_aug_6}
+\end{table}
+После агументации тестовой выборки в некоторых ячейках матрицы ошибок стало сильно меньше ((4,9), (3,9)), но в некоторых местах
+можно увидеть сильное увеличение количества ошибок по сравнению с базовой моделью((7,1), (8,3)).
+
+В Таблице \ref{base_vs_aug_obj_6} представлены некоторые объекты, 
+на которых справился алгоритм с аугментацией теста, а базовый нет. Сложно сказать из-за какого именно преобразования
+(свдиг влево, сдвиг вниз) эти объекты были классифицированы павильно.
+
+\begin{table}[htb]
+    \tabcolsep = -12pt
+    \begin{tabular}{lccccccc}
+        \textbf{picture}      & \includegraphics[width=\y cm]{wrong_base_vs_aug_6/digit_2_0_2753.pdf}  &\includegraphics[width=\y cm]{wrong_base_vs_aug_6/digit_7_9_2724.pdf}  &\includegraphics[width=\y cm]{wrong_base_vs_aug_6/digit_9_0_6019.pdf}  &\includegraphics[width=\y cm]{wrong_base_vs_aug_6/digit_4_9_7119.pdf}  &\includegraphics[width=\y cm]{wrong_base_vs_aug_6/digit_5_6_4480.pdf}  &\includegraphics[width=\y cm]{wrong_base_vs_aug_6/digit_6_5_1790.pdf}  &\includegraphics[width=\y cm]{wrong_base_vs_aug_6/digit_8_2_7479.pdf}  \\
+        \textbf{true label}    & 2 & 7 & 9 & 4 & 5 & 6 & 8 \\
+        \textbf{predict (base)} & 0 & 9 & 0 & 9 & 6 & 5 & 2
+    \end{tabular}
+    \caption{Объекты, которые удалось правильно классифицировать(aug\_test)}
+    \label{base_vs_aug_obj_6}
+ \end{table}
+
+ В Таблице \ref{5_vs_6} представлены некоторые объекты, 
+ на которых справился алгоритм с аугментацией теста, а алгоритм с аугментацией обучающей выборки нет:
+
+ 
+
+  \begin{table}[htb]
+    \tabcolsep = -12pt
+    \begin{tabular}{lccccccc}
+        \textbf{picture}      & \includegraphics[width=\y cm]{wrong_5_vs_6/digit_1_5_1026.pdf}  &\includegraphics[width=\y cm]{wrong_5_vs_6/digit_2_0_2753.pdf}  &\includegraphics[width=\y cm]{wrong_5_vs_6/digit_4_9_5628.pdf}  &\includegraphics[width=\y cm]{wrong_5_vs_6/digit_5_6_854.pdf}  &\includegraphics[width=\y cm]{wrong_5_vs_6/digit_7_9_174.pdf}  &\includegraphics[width=\y cm]{wrong_5_vs_6/digit_8_4_4301.pdf}  &\includegraphics[width=\y cm]{wrong_5_vs_6/digit_9_0_6019.pdf}  \\
+        \textbf{true label}    & 1 & 2 & 4 & 5 & 7 & 8 & 9 \\
+        \textbf{predict (aug\_train)} & 5 & 0 & 9 & 6 & 9 & 4 & 0
+
+    \end{tabular}
+    \caption{Объекты, которые удалось правильно классифицировать(aug\_train vs aug\_test)}
+    \label{5_vs_6}
+ \end{table}
+
+\begin{thebibliography}{99}
+    \bibitem{deformationmodels}Keysers D. et al. Deformation models for image recognition
+    //IEEE Transactions on Pattern Analysis and Machine Intelligence.
+     – 2007. – Т. 29. – №. 8. – С. 1422-1435.
+\end{thebibliography}
 \end{document}

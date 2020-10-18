@@ -8,18 +8,19 @@
 \usepackage{multirow}
 \usepackage[footnotesize]{caption2}
 \usepackage{indentfirst}
-\usepackage[colorlinks,linkcolor=blue,citecolor=blue, unicode]{hyperref}
+\usepackage[colorlinks,linkcolor=blue(ryb),citecolor=blue(ryb), unicode]{hyperref}
 
 \usepackage{xcolor}
 \usepackage{sectsty}
 
+\definecolor{blue(ryb)}{rgb}{0.01, 0.28, 1.0}
 %\usepackage[ruled,section]{algorithm}
 %\usepackage[noend]{algorithmic}
 %\usepackage[all]{xy}
 
 % Параметры страницы
-\sectionfont{\color{blue}}
-\subsectionfont{\color{blue}}
+\sectionfont{\color{blue(ryb)}}
+\subsectionfont{\color{blue(ryb)}}
 \textheight=24cm % высота текста
 \textwidth=16cm % ширина текста
 \oddsidemargin=0pt % отступ от левого края
@@ -142,7 +143,7 @@ Sklearn метод, реализующих поиск соседей не под
     \item Использование весов улучшает качество для любых $k$.
     \item У всех алгоритмов падает качество при $k>4$
     \item Лучшим оказался алгоритм с $k=4$ использующий косинусное расстояние и веса.
-    \textcolor{blue}{\textbf{Его точность: 0.975}}
+    \textcolor{blue(ryb)}{\textbf{Его точность: 0.975}}
 \end{itemize}
 
 Интересно, что без весов лучшее качество достигается при $k=3$, а с весами  при $k=4$. 
@@ -172,7 +173,7 @@ Sklearn метод, реализующих поиск соседей не под
 
 \section{Задание №4}
 Применим лучший алгоритм (cosine, k=5).
-\textcolor{blue}{\textbf{Точность на тесте: 0.9771}}
+\textcolor{blue(ryb)}{\textbf{Точность на тесте: 0.9771}}
 
 \subsection{Сравнение с лучшими алгоритмами}
 
@@ -295,7 +296,7 @@ Sklearn метод, реализующих поиск соседей не под
 В результате получим обучающую выборку размером 180000.
 
 \newpage
-\textcolor{blue}{\textbf{Точность на тесте: 0.9834}}
+\textcolor{blue(ryb)}{\textbf{Точность на тесте: 0.9834}}
 
 Взглянем на матрицу ошибок после аугментации(Таблица \ref{conf_matrix_aug}):
 
@@ -337,7 +338,7 @@ Sklearn метод, реализующих поиск соседей не под
 среди двух наборов соседей будем искать k самых ближайших.
 По кросс-валидации на подвыборке 25000 лучшими оказались параметры $shift\_x=-1$ и $shift\_y = -1$.
 
-\textcolor{blue}{\textbf{Точность на тесте: 0.98}}
+\textcolor{blue(ryb)}{\textbf{Точность на тесте: 0.98}}
 
 Взглянем на матрицу ошибок после агументации тестовой выборки(Таблица \ref{conf_matrix_aug_6})---
 в некоторых ячейках матрицы ошибок стало сильно меньше ((4,9), (3,9)), но в некоторых местах
@@ -385,6 +386,15 @@ Sklearn метод, реализующих поиск соседей не под
     \label{5_vs_6}
  \end{table}
 
+ \section{Выводы (без формализма)}
+
+KNN оказался удивительно мощной моделью в данном случае. И подумать не мог, что 
+можно добиться такого качества не на игрушечных данных, используя алгоритм практически "из коробки". 
+Возможно, если более серьезно подойти к аугментации, то можно и до 1\% ошибок добраться, 
+но времени и сил на дополнительные исследования не осталось.
+
+P.S. Отличная практическая работа, мне понравилось! :)
+ 
 \begin{thebibliography}{99}
     \bibitem{deformationmodels}Keysers D. et al. Deformation models for image recognition
     //IEEE Transactions on Pattern Analysis and Machine Intelligence.

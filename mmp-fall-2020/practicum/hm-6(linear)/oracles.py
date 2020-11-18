@@ -64,11 +64,9 @@ class BinaryLogistic(BaseSmoothOracle):
         """
         line_y = y.ravel()
         grad_reg = self.l2*w.ravel()
-        if isinstance(X, np.ndarray):
-            grad_res = self._mul(self._mul(X, line_y), expit(-line_y * X.dot(w[:, None]).ravel()))
-        else:
-            grad_res = self._mul(self._mul(X, line_y),
-                                 expit(-line_y * X.dot(w[:, None]).ravel())).toarray()
+        grad_res = self._mul(self._mul(X, line_y), expit(-line_y * X.dot(w[:, None]).ravel()))
+        if not isinstance(X, np.ndarray):
+            grad_res = grad_res.toarray()
         return grad_reg-np.sum(grad_res, axis=0)/line_y.size
 
     def _mul(self, X, y):

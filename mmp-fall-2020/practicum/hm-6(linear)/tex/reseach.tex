@@ -1,0 +1,356 @@
+\documentclass[12pt,fleqn]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage{amssymb,amsmath,mathrsfs,amsthm}
+\usepackage[russian]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage{multirow}
+\usepackage{indentfirst}
+\usepackage[colorlinks,linkcolor=blue(ryb),citecolor=blue(ryb), unicode]{hyperref}
+
+\usepackage{xcolor}
+\usepackage{sectsty}
+
+\usepackage{amsmath}
+\usepackage{systeme}
+\definecolor{blue(ryb)}{rgb}{0.2, 0.2, 0.6}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+
+%\usepackage[ruled,section]{algorithm}
+%\usepackage[noend]{algorithmic}
+%\usepackage[all]{xy}
+
+% Параметры страницы
+\sectionfont{\color{blue(ryb)}}
+\subsubsectionfont{\color{blue(ryb)}}
+\subsectionfont{\color{blue(ryb)}}
+\textheight=24cm % высота текста
+\textwidth=16cm % ширина текста
+\oddsidemargin=0pt % отступ от левого края
+\topmargin=-2.5cm % отступ от верхнего края
+\parindent=24pt % абзацный отступ
+\parskip=0pt % интервал между абзацам
+\tolerance=2000 % терпимость к "жидким" строкам
+\flushbottom % выравнивание высоты страниц
+%\def\baselinestretch{1.5}
+\setcounter{secnumdepth}{0}
+\renewcommand{\baselinestretch}{1.1}
+
+\newcommand{\norm}{\mathop{\rm norm}\limits}
+\newcommand{\real}{\mathbb{R}}
+
+\newcommand{\ex}{\mathbb{E}}
+\newcommand{\diag}{\mathrm{diag}}
+\newcommand{\intset}{\mathrm{int}}
+\newcommand{\softmax}{\mathop{\rm softmax}\limits}
+\newcommand{\lossfunc}{\mathcal{L}'}
+\newcommand{\elbo}{\mathcal{L}}
+\newcommand{\normal}[3]{\mathcal{N}(#1 | #2, #3)}
+\newcommand{\dd}[2]{\frac{\partial#1}{\partial#2}}
+\newcommand{\kl}[2]{\mathop{KL}(#1 \parallel #2)}
+\newcommand{\nm}{\mathcal{N}}
+\newcommand{\sle}{\; \Rightarrow \;}
+\newcommand{\indpos}{\mathbf{I}_{d_k}^{+}[i, j]}
+\newcommand{\indneg}{\mathbf{I}_{d_k}^{-}[i, j]}
+
+\usepackage{pgfplots}
+
+%my settings
+\graphicspath{{../_figures/}}
+\usepackage{wrapfig}
+\usepackage[font=small]{caption}
+\title{Исследование работы линейных моделей}
+
+\author{Тыцкий Владислав}
+\date{Ноябрь 2020}
+
+\begin{document}
+
+\maketitle
+\section{Градиент в логистической регрессии}
+Пусть $X \in R^{NxF}$ -- матрица объектов-признаков, $y \in \{-1,1\}^N$ -- метки соответствующих
+объектов, $w \in R^F$ -- вектор весов, $x_i,$ -- i-ый объект $ y_i$ -- метка класса i-ого
+объекта,  T - стохастическая подвыборка($|T|$ и T будут обозначаться Т в зависимости от контекста).
+Везде будем считать, что добавлен константый признак.
+
+Дана задача оптимизации:
+\begin{align}
+    \notag & Q(X,y,w) = \mathcal{L}(X,y,w)+\frac{\lambda}{2}||w||_2^2 \rightarrow \min_{w} \\
+    \notag & \mathcal{L}(X,y,w) = \frac{1}{T}\sum_{i=1}^{T}\log(1+\exp(-y_i\langle x_i, w\rangle), T \leq N
+\end{align}
+Для решения этой задачи с помощью градиентых методов необходимо знать градиент функционала $Q(X,y,w)$
+
+\begin{align}
+    \notag dQ = &d\mathcal{L} + \frac{\lambda}{2}d\langle w,w \rangle = d\mathcal{L} + \lambda\langle w, dw \rangle \\
+    \notag d\mathcal{L} = &\frac{1}{T}\sum_{i=1}^{T}\frac{d(\exp(-y_i\langle x_i, w\rangle))}{1+\exp(-y_i\langle x_i, w\rangle)} =
+    \frac{1}{T}\sum_{i=1}^{T}\frac{\exp(-y_i\langle x_i, w\rangle)d\langle-y_ix_i,w\rangle}{1+\exp(-y_i\langle x_i, w\rangle)} = \\
+    \notag -&\frac{1}{T}\sum_{i=1}^{T}\frac{\langle y_ix_i,dw\rangle}{1+\exp(y_i\langle x_i, w\rangle)} 
+\end{align}
+Заметим, что $dQ = \langle \nabla Q,dw\rangle$. Окончательно получаем:
+\begin{align}
+    \notag \nabla Q(X,y,w) = \lambda w -\frac{1}{T}\sum_{i=1}^{T}\frac{y_ix_i}{1+\exp(y_i\langle x_i, w\rangle)} 
+\end{align}
+\subsection{Случай для K классов}
+Пусть $X \in R^{NxF}$ -- матрица объектов-признаков, $y \in K^N$ -- метки соответствующих
+объектов, где $K=\{1\dots k\}$ -- множество классов, $w_i \in R^F$ -- вектор весов соответствующий k-ому классу, 
+$x_i$ -- i-ый объект $ y_i$ -- метка класса i-ого
+объекта соответственно, T - стохастическая подвыборка($|T|$ и T будут обозначаться 
+Т в зависимости от контекста).
+
+Дана задача оптимизации --- максимизация правдоподобия:
+\begin{align}
+    \notag & Q(X,y,w) = -\frac{1}{T}\sum_{i=1}^{T}\log\mathbb{P}(y_i|x_i)+
+    \frac{\lambda}{2}\sum_{k=1}^{K}||w_k||_2^2 \rightarrow \min_{w_1\dots w_k} \\
+    \notag & \mathbb{P}(y=c|x) = \frac{\exp{\langle w_c,x \rangle}}{\sum_{k=1}^{K}\exp{\langle w_k,x \rangle}}
+\end{align}
+Найдем градиент по $w_m$.
+\begin{align}
+    \notag & dQ(X,y,w) = d(-\frac{1}{T}\sum_{i=1}^{T}\log\mathbb{P}(y_i|x_i)) + d(\frac{\lambda}{2}\sum_{k=1}^{K}||w_k||_2^2) =
+    -\frac{1}{T}d(\sum_{i=1}^{T}\log\mathbb{P}(y_i|x_i)) + \lambda(w_m,dw_m) \\
+    \notag & d(\sum_{i=1}^{T}\log\mathbb{P}(y_i|x_i))_{w_m} = \sum_{i=1}^{T}d(\log\exp{\langle w_{y_i}, x_i \rangle})-
+    \sum_{i=1}^{T}d(\log \sum_{k=1}^{K}\exp{\langle w_k, x_i \rangle}) = \\
+    \notag =&\sum_{\substack{i:y_i=w_m \\ i\in T}}\langle x_i,dw_m \rangle - 
+    \sum_{i=1}^{T}\frac{\exp{\langle w_m,x_i\rangle}\langle x_i,dw_m \rangle}{\sum_{k=1}^{K}\exp{\langle w_k, x_i \rangle}}
+\end{align}
+Отсюда получаем: 
+$$
+\nabla Q_{w_m} =\lambda w_m + \frac{1}{T}\sum_{i=1}^{T}
+\frac{\exp{\langle w_m,x_i\rangle}x_i}{\sum_{k=1}^{K}\exp{\langle w_k, x_i \rangle}}-
+\frac{1}{T}\sum_{\substack{i:y_i=w_m \\ i\in T}}x_i 
+$$
+\subsection{Эквивалетность бинарной логистической регрессии и мультиномиальной при K=2}
+\noindent \textit{Доказательство}.
+
+\noindent Пусть $w_{+}$ --- вектор весов соответствующий первому классу, а $w_{-}$ --- -1 классу.
+
+\noindent Введем $w = w_{+}-w_{-}$.
+\noindent Рассмотрим задачу мультиномиальной регрессии при K=2:
+
+\begin{align}
+    \notag & Q(X,y,w) = -\frac{1}{T}\sum_{i=1}^{T}\log
+    \frac{\exp{\langle w_c,x \rangle}}{\sum_{k=1}^{K}\exp{\langle w_k,x \rangle}}=
+     = - \frac{1}{T}\sum_{\substack{i:y_i=w_{+} \\ i\in T}}
+    \log\frac{\exp{\langle w_{+}, x_i \rangle}}{\exp{\langle w_{+}, x_i \rangle}+\exp{\langle w_{-}, x_i \rangle}}\\
+    \notag - &\frac{1}{T}\sum_{\substack{i:y_i=w_{-} \\ i\in T}}
+    \log\frac{\exp{\langle w_{-}, x_i \rangle}}{\exp{\langle w_{+}, x_i \rangle}+\exp{\langle w_{-}, x_i \rangle}} = 
+     - \frac{1}{T}\sum_{\substack{i:y_i=w_{+} \\ i\in T}}\log\frac{1}{1+\exp{\langle -w, x_i \rangle}}- \\
+    \notag- &\frac{1}{T}\sum_{\substack{i:y_i=w_{-} \\ i\in T}}\log\frac{1}{\exp{\langle w, x_i \rangle} + 1} = 
+    = \frac{1}{T}\sum_{i=1}^{T}\log(1+\exp(-y_i\langle w,x_i \rangle))
+\end{align}
+То есть функции потерь для бинарной логрегрессии и мультиномиальной регрессии 
+при K=2 эквиваленты.
+
+\noindent\textit{ч.т.д}
+\section{Задание №1}
+\noindent Предобработка документов легко делается с помощью модуля re и метода apply из pandas.
+\begin{lstlisting}[language=Python, caption=Clear documents]
+    X_train_df.apply(lambda x: re.sub("[^a-zA-z0-9]", " ", x.lower()))
+    X_test_df.apply(lambda x: re.sub("[^a-zA-z0-9]", " ", x.lower()))
+\end{lstlisting}
+\section{Задание №2}
+\noindent Использование CountVectorizer для представления слов с помощью bag of words.
+
+\begin{lstlisting}[language=Python, caption=Vectorizer]
+vectorizer = CountVectorizer(lowercase=True, min_df=50)
+X_train_v = vectorizer.fit_transform(X_train["comment_text"])
+X_test_v = vectorizer.transform(X_test["comment_text"])
+\end{lstlisting}
+
+\noindent Min\_df = 50 имеет под собой основание.''Оскорбительные'' слова в данном датасете 
+встречаются обычно чаще 100 раз. Листинг ниже (\ref{code:count_bad}) демонстрирует код для подсчета.
+
+\begin{lstlisting}[language=Python, caption=Count bad words, label=code:count_bad]
+text = X_train["comment_text"]
+count = 0
+count_bad = 0
+for i in range(text.size):
+    if text[i].find("very very bad word") != -1:
+        count += 1
+        if X_train["is_toxic"][i]:
+            count_bad += 1
+\end{lstlisting}
+
+\section{Задание №3, №4, №5}
+Исследуем как ведет себя метод (стохастического) градиентого спуска. 
+Я посчитал, что 3, 4, 5 задания можно совместить в одно большое задание --- легче прослеживается
+логика повествования.
+\footnote{Все графики строились на весьма урезанной по количеству признаков выборке (2300).
+ Это сделано для того, чтобы вычислительной мощности компьютера Тыцкого.В.И. хватило построить
+ их за разумное время.}
+
+\subsection{Начальная инициализация}
+Интересно взглянуть как влияет начальная инициализация весов на функцию потерь.Таблице \ref{pic:weights}
+\footnote{Я так и не понял как поменять тип caption с Таблицы на Рисунок}
+\newpage
+\begin{table}[htb]
+    \centering
+    \tabcolsep = -10pt
+    \begin{tabular}{cc}
+        \includegraphics[width=9cm]{/task_3/weights.pdf}  & \includegraphics[width=9cm]{/task_4/weights.pdf} \\
+        GD & SGD
+    \end{tabular}
+    \caption{Зависимость функции потерь от начальной инициализации и итераций}
+    \label{pic:weights}
+\end{table}
+
+Можно заметить, что внезависисмости от начальной иниципализации спустя небольшое
+количество итераций(эпох) функция потерь становится примерно одинаковой.
+
+\textbf{В других экспериментах будем использовать единичный вектор в качестве начальной инициализации}
+\subsection{Параметры задающие скорость обучения}
+В эспериметнах используется Линейных классификатор, который вычисляет новый вес $w^{i+1}$ 
+по формуле:
+
+$$
+    w^{i+1} = w^i - \eta  \nabla Q, \:
+    \eta = \frac{\alpha}{i^\beta}
+$$
+где Q - градиент функции потерь.
+
+\noindent Небоходимо понять как влияют гиперпараметры $\alpha$ и $\beta$ на алгоритм.
+\noindent В Таблице \ref{pic:GD_alpha_beta} представлены 
+графики зависимости функции потерь от параметров $\alpha$ и $\beta$.
+
+\begin{table}[htb]
+    \centering
+    \tabcolsep = -10pt
+    \begin{tabular}{ccc}
+        \includegraphics[width=6cm]{/task_3/sub_1/fig_a_0.1_b_1.pdf}  & 
+        \includegraphics[width=6cm]{/task_3/sub_1/fig_a_1.0_b_1.pdf} &
+         \includegraphics[width=6cm]{/task_3/sub_1/fig_a_10.0_b_1.pdf} \\
+         $\alpha = 0.1$ & $\alpha = 1.0$ & $\alpha = 10.0$
+    \end{tabular}
+    \caption{Зависимость функции потерь от alpha и beta для GD}
+    \label{pic:GD_alpha_beta}
+\end{table}
+
+\newpage
+
+Заметим как быстро алгоритм отстанавливается, при $\beta>0$. Если и имеет смысл 
+использовать ненулевые $\beta$, то только для больших значений параметра $\alpha$.
+В то же время при сильно больших $\alpha$ и $\beta=0$ градиентный спуск может не
+спуститься в точку экстремума, что плохо сказывается на качестве модели.
+
+\textbf{В дальнейших эспериментах будем брать $\alpha<1$ и $\beta=0$.}
+
+Для стохастического градиентного спуска картина такая же
+(Таблица \ref{pic:SGD_alpha_beta}) за исключением того, что при 
+больших $\alpha$ поведение еще более непредсказуемо. 
+
+\begin{table}[htb]
+    \centering
+    \tabcolsep = -10pt
+    \begin{tabular}{ccc}
+        \includegraphics[width=6cm]{/task_4/sub_1/fig_a_0.1_b_1.pdf}  & 
+        \includegraphics[width=6cm]{/task_4/sub_1/fig_a_1.0_b_1.pdf} &
+         \includegraphics[width=6cm]{/task_4/sub_1/fig_a_10.0_b_1.pdf} \\
+         $\alpha = 0.1$ & $\alpha = 1.0$ & $\alpha = 10.0$
+    \end{tabular}
+    \caption{Зависимость функции потерь от alpha и beta для SGD}
+    \label{pic:SGD_alpha_beta}
+\end{table}
+
+\subsection{Сравнение GD и SGD в скорости}
+На предущих графиках(Таблица \ref{pic:GD_alpha_beta} Таблица \ref{pic:SGD_alpha_beta})
+можно пронаблюдать скорость обучения GD и SGD классификатора. GD делает более ''точныe''
+шаги градиентного спуска, но скорость выполнения этого шага довольно медленная. 
+Хоть SGD чуть менее точен(совсем незначительно), но из-за того,
+что он делает больше шагов градиентного спуска за эпоху, он быстрее сходится к локальному экстремуму. 
+Важно заметить, что выбор в пользу SGD сделан конкретно для данного датасета. Для других задач 
+поведение GD и SGD может быть совсем разное.
+
+\textbf{В дальнейших экспериментах будем использовать SGD классификатор.}
+
+\subsection{Время на одну итерацию(эпоху)}
+Важно оценить время работы классификатора в зависимости от итераций(эпох), чтобы подобрать
+оптимальное по соотношению качество скорость итераций(эпох). Таблица \ref{pic:time_iter}.
+Одна итерация(эпоха) делается чуть меньше, чем за секунду.
+
+\begin{table}[htb]
+
+    \centering
+    \tabcolsep = -10pt
+    \begin{tabular}{cc}
+        \includegraphics[width=6cm]{/task_3/sub_1/fig_a_0.1_b_1.pdf}  & 
+        \includegraphics[width=6cm]{/task_3/sub_2/fig_a_0.1_b_1.pdf} \\
+        Time & iterations GD \\
+         \includegraphics[width=6cm]{/task_4/sub_1/fig_a_0.1_b_1.pdf} &
+         \includegraphics[width=6cm]{/task_4/sub_2/fig_a_0.1_b_1.pdf} \\
+         Time & epoch SGD
+    \end{tabular}
+    \caption{Зависимость между временем и итерацией(эпохой)}
+    \label{pic:time_iter}
+\end{table}
+
+
+\subsection{Размер батча для SGD}
+\begin{wrapfigure}[13]{r}{0.5\textwidth}
+    \includegraphics[width=8cm]{/task_4/fig_batch.pdf} 
+    \captionsetup{font={scriptsize,it}}
+    \caption{Зависимость функции потерь от размера батча}
+    \label{pic:batch}
+\end{wrapfigure}
+
+В случае выбора SGD в качесте основного алгоритма важно понять какой размер батча(подвыборки)
+оптимален. Важна и скорость работы, и точность шагов градиентного спуска. Справа представлен
+график Рис.\ref{pic:batch}.
+
+
+Можно заметить, что уже при размерах батча 500, 2000 скорость сходимости и
+точность шагов градиентого спуска приемлимы --- не возникает скачков, как у размера 100
+и скорость гораздо выше, чем для размера 10000 или всей выборки.
+
+В угоду точности сходимости можно немного пожертвовать скоростью, поэтому в \textbf{будущих
+экспериментах будет использоваться размер батча 2000.}
+
+\subsection{Качество на обучающей выборке}
+Уменьшение функции потерь --- не самое важное для нас. Необходимо взглянуть как меняется мера
+качества в идеале на отложенной выборке.\footnote{Не стал делать отложенную выборку и мерил на обучающей} 
+Ниже представлены графики Таблица \ref{pic:accuracy} для SGD классификатора(batch\_size=2000,
+l2\_coef=0.1)
+
+\begin{table}[htb]
+    \centering
+    \tabcolsep = -10pt
+    \begin{tabular}{ccc}
+        \includegraphics[width=6cm]{/task_4/sub_3/fig_a_0.1_b_1.pdf}  & 
+        \includegraphics[width=6cm]{/task_4/sub_3/fig_a_1.0_b_1.pdf} &
+         \includegraphics[width=6cm]{/task_4/sub_3/fig_a_10.0_b_1.pdf} \\
+         $\alpha = 0.1$ & $\alpha = 1.0$ & $\alpha = 10.0$
+    \end{tabular}
+    \caption{Зависимость функции потерь от alpha и beta для GD}
+    \label{pic:accuracy}
+\end{table}
+
+Лучшая модель получилась 
+\end{document}

@@ -52,7 +52,7 @@ class BinaryLogistic(BaseSmoothOracle):
         res = np.logaddexp(np.array([0]), -line_y*X.dot(w[:, None].ravel()))
         return reg + np.sum(res)/line_y.size
 
-    def grad(self, X, y, w):
+    def grad(self, X, y, w, intercept=False):
         """
         Вычислить градиент функционала в точке w на выборке X с ответами y.
 
@@ -64,6 +64,8 @@ class BinaryLogistic(BaseSmoothOracle):
         """
         line_y = y.ravel()
         grad_reg = self.l2*w.ravel()
+        if intercept:
+            grad_reg[-1] = 0
         grad_res = self._mul(self._mul(X, line_y), expit(-line_y * X.dot(w[:, None]).ravel()))
         if not isinstance(X, np.ndarray):
             grad_res = grad_res.toarray()

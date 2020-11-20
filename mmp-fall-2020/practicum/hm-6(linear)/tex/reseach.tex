@@ -89,6 +89,8 @@
 \graphicspath{{../_figures/}}
 \usepackage{wrapfig}
 \usepackage[font=small]{caption}
+\usepackage{multirow}
+
 \title{Исследование работы линейных моделей}
 
 \author{Тыцкий Владислав}
@@ -333,9 +335,9 @@ $$
 В угоду точности сходимости можно немного пожертвовать скоростью, поэтому в \textbf{будущих
 экспериментах будет использоваться размер батча 2000.}
 
-\subsection{Качество на обучающей выборке}
+\subsection{Качество алгоритма}
 Уменьшение функции потерь --- не самое важное для нас. Необходимо взглянуть как меняется мера
-качества в идеале на отложенной выборке.\footnote{Не стал делать отложенную выборку и мерил на обучающей} 
+качества в идеале на отложенной выборке.\footnote{Не стал делать отложенную выборку и замерил на обучающей} 
 Ниже представлены графики Таблица \ref{pic:accuracy} для SGD классификатора(batch\_size=2000,
 l2\_coef=0.1)
 
@@ -352,5 +354,85 @@ l2\_coef=0.1)
     \label{pic:accuracy}
 \end{table}
 
-Лучшая модель получилась 
+Лучшее качество на данном этапе экспериментов для тестовой выборки:
+\textbf{roc-auc-- 0.928, accuracy-- 0.860}
+
+Обучение проводилось на выборке, векторизованной Bag of words с $min\_df=50$,
+с помощью SGD классификатора с параметрами:\newline
+$batch\_size=2000, \alpha = 0.5, \beta = 0, max\_iter=1500, l2\_coef=0.01, tolerance=1e-7,
+fit\_intercept=True$.
+\section{Задание №6}
+При обработке текстов возникает проблема того, что одно и то же слово может присутствовать
+в коллекции в разных формах(например play,played). Все слова стоит привести в начальную форму --
+это может существенно уменьшить признаковое пространство и улучшить качество модели. 
+Возьмем за основу алгритм лемматизации слов. Ниже представлен Листинг \ref{code:lemm}, 
+демонстрирующий применение алгоритма лемматизации с помощью библиотеки nltk.
+
+\begin{lstlisting}[language=Python, caption=Lemmatizer,label=code:lemm]
+# https://webdevblog.ru/podhody-lemmatizacii-s-primerami-v-python/
+def get_wordnet_pos(word):
+    tag = nltk.pos_tag([word])[0][1][0].upper()
+    tag_dict = {"J": wordnet.ADJ,
+                "N": wordnet.NOUN,
+                "V": wordnet.VERB,
+                "R": wordnet.ADV}
+    return tag_dict.get(tag, wordnet.NOUN)
+
+
+lem= WordNetLemmatizer()
+
+X_train.apply(lambda x: " ".join([lem.lemmatize(w, get_wordnet_pos(w)) 
+        for w in nltk.word_tokenize(x)]))
+X_test.apply(lambda x: " ".join([lemm.lemmatize(w, get_wordnet_pos(w)) 
+        for w in nltk.word_tokenize(x)]))
+\end{lstlisting}
+
+\noindentТакже перед лемматизацией удалим стоп-слова.
+
+Размерность признакового пространства снизилась с 3930 до 3090. На скорость работы
+уменьшение размерности несильно повлияло\footnote{в виду того, что и так размерность не самая большая}.
+Accuracy и roc-auc на тестовой выборке существуенно возрасло:
+\textbf{roc-auc -- 0.935, accuracy -- 0.865}
+
+Обучение проводилось на лемматизированной выборке, векторизованной Bag of words с 
+$min\_df=50, stop\_words=english$,
+с помощью SGD классификатора с параметрами:\newline
+$batch\_size=2000, \alpha = 0.8, \beta = 0, max\_iter=1800, l2\_coef=0.01, tolerance=1e-7,
+fit\_intercept=False$.
+
+\newpage
+
+\section{Задание №7}
+Посмотрим как влияет предобработка данных, а конкретно параметры min\_df, max\_df.
+В Таблице \ref{table:min_max_df} представлены зависимости времени, размерности,
+ качества(BoW, TFIDF) от min\_df,max\_df.
+\begin{table}[htb]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|l|}
+    \hline
+    \multicolumn{2}{|l|}{} & shape & time s. & \begin{tabular}[c]{@{}l@{}}accuracy\\ BoW\end{tabular} & \begin{tabular}[c]{@{}l@{}}accuracy\\ TFIDF\end{tabular} \\ \hline
+    \multirow{3}{*}{max\_df = max} & min\_df = 10    & 11000 & 23    & 0.851 & 0.741 \\ \cline{2-6} 
+                                  & min\_df = 100   & 2080  & 7.5   & 0.850 & 0.831 \\ \cline{2-6} 
+                                  & min\_df  = 1000 & 150   & 2.0   & 0.784 & 0.784 \\ \hline
+    \multirow{3}{*}{min\_df = 50} & max\_df  = 300  & 2957  & 8.27  & 0.723 & 0.698 \\ \cline{2-6} 
+                                  & max\_df = 800  & 3452  & 9.59  & 0.801 & 0.725 \\ \cline{2-6} 
+                                  & max\_df = max   & 3660  & 10.79 & 0.848 & 0.766 \\ \hline
+    \end{tabular}
+    \caption{Зависимость некоторых величин от min\_df, max\_df и типов векторизации}
+    \label{table:min_max_df}
+\end{table}
+
+Размерность пространства очень сильно увеличивается, если min\_df близко к нулю, но качество
+в свою очередь несильно меняется. Как было упомянутно в начале исследования, обычно все 'плохие''
+слова встречаются чаще, чем 100 раз на коллекцию, поэтому уменьшение min\_df приводит только 
+к увеличению размерности и времени работы.
+
+Max\_df неразумно ставить каким-либо, кроме максимального в данном случае т.к. мы можем потерять
+важную информацию, а самые распространенные слова(стоп-слова) английского языка мы предварительно
+убрали.
+
+Интересно, что качество после обработки с помощью TFIDF стабильно хуже, чем BoW. \textbf{Лучший алгоритм
+показал roc-auc -- 0.935, accuracy -- 0.853 на тестовой выборке.(TF-IDF)}
+
+\section{Задание №8}
 \end{document}

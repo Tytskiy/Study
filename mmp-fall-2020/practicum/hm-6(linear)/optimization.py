@@ -1,4 +1,5 @@
 import scipy.sparse as spr
+
 import numpy as np
 from oracles import BinaryLogistic
 import time
@@ -16,7 +17,7 @@ class GDClassifier:
     """
 
     def __init__(self, loss_function="binary_logistic", step_alpha=1, step_beta=0,
-                 tolerance=1e-5, max_iter=1000, **kwargs):
+                 tolerance=1e-5, max_iter=1000, fit_intercept=False, **kwargs):
         """
         loss_function - строка, отвечающая за функцию потерь классификатора.
         Может принимать значения:
@@ -39,6 +40,7 @@ class GDClassifier:
         self.step_beta = step_beta
         self.tolerance = tolerance
         self.max_iter = max_iter
+        self.fit_intercept = fit_intercept
         self.history = {"time": [], "func": []}
 
     def fit(self, X, y, w_0=None, trace=False):
@@ -62,9 +64,16 @@ class GDClassifier:
         """
 
         if w_0 is None:
-            w = np.ones(X.shape[1])
+            w = np.zeros(X.shape[1])
         else:
             w = w_0
+
+        if self.fit_intercept:
+            w = np.hstack((w, [1]))
+            if isinstance(X, np.ndarray):
+                X = np.hstack((X, np.ones(X.shape[0])))
+            else:
+                X = spr.hstack((X, np.ones(X.shape[0])[:, None]), format="csr")
 
         n = self.step_alpha
 
@@ -78,7 +87,7 @@ class GDClassifier:
                 break
 
             start_time = time.time()
-            w = w - n*self.loss.grad(X, y, w)
+            w = w - n*self.loss.grad(X, y, w, intercept=self.fit_intercept)
             self.history["time"].append(time.time()-start_time)
 
             n /= (i+1)**self.step_beta
@@ -99,6 +108,12 @@ class GDClassifier:
 
         return: одномерный numpy array с предсказаниями
         """
+        if self.fit_intercept:
+            if isinstance(X, np.ndarray):
+                X = np.hstack((X, np.ones(X.shape[0])))
+            else:
+                X = spr.hstack((X, np.ones(X.shape[0])[:, None]), format="csr")
+
         tmp = X.dot(self.w[:, None]).ravel() > 0
         return np.array(np.array([1 if i == True else -1 for i in tmp]))
 
@@ -111,8 +126,14 @@ class GDClassifier:
         return: двумерной numpy array, [i, k] значение соответветствует вероятности
         принадлежности i-го объекта к классу k
         """
+        if self.fit_intercept:
+            if isinstance(X, np.ndarray):
+                X = np.hstack((X, np.ones(X.shape[0])))
+            else:
+                X = spr.hstack((X, np.ones(X.shape[0])[:, None]), format="csr")
+
         tmp = expit(X.dot(self.w[:, None])).reshape(-1, 1)
-        return np.vstack((1-tmp, tmp))
+        return np.hstack((1-tmp, tmp))
 
     def get_objective(self, X, y):
         """
@@ -150,7 +171,7 @@ class SGDClassifier(GDClassifier):
     """
 
     def __init__(self, loss_function="binary_logistic", batch_size=1000, step_alpha=1, step_beta=0,
-                 tolerance=1e-5, max_iter=10000, random_seed=153, **kwargs):
+                 tolerance=1e-5, max_iter=10000, random_seed=153, fit_intercept=False, **kwargs):
         """
         loss_function - строка, отвечающая за функцию потерь классификатора.
         Может принимать значения:
@@ -174,8 +195,8 @@ class SGDClassifier(GDClassifier):
 
         **kwargs - аргументы, необходимые для инициализации
         """
-        super().__init__(loss_function=loss_function, step_alpha=step_alpha,
-                         step_beta=step_beta, tolerance=tolerance, max_iter=max_iter, **kwargs)
+        super().__init__(loss_function=loss_function, step_alpha=step_alpha, step_beta=step_beta,
+                         tolerance=tolerance, max_iter=max_iter, fit_intercept=fit_intercept, **kwargs)
         self.batch_size = batch_size
         self.random_seed = random_seed
         self.history["epoch_num"] = []
@@ -208,10 +229,18 @@ class SGDClassifier(GDClassifier):
         history['weights_diff']: list of floats, содержит квадрат нормы разности векторов весов с соседних замеров
         (0 для самой первой точки)
         """
+
         if w_0 is None:
-            w = np.ones(X.shape[1])
+            w = np.zeros(X.shape[1])
         else:
             w = w_0
+
+        if self.fit_intercept:
+            w = np.hstack((w, [1]))
+            if isinstance(X, np.ndarray):
+                X = np.hstack((X, np.ones(X.shape[0])))
+            else:
+                X = spr.hstack((X, np.ones(X.shape[0])[:, None]), format="csr")
 
         n = self.step_alpha
 
@@ -233,7 +262,7 @@ class SGDClassifier(GDClassifier):
                 break
 
             curr_epoch = i*self.batch_size/X.shape[0]
-            if(curr_epoch-prev_epoch > log_freq):
+            if(curr_epoch-prev_epoch > log_freq and trace):
                 self.history["time"].append(time.time()-start_time)
                 start_time = time.time()
                 prev_func = curr_func
@@ -241,7 +270,7 @@ class SGDClassifier(GDClassifier):
                 self.history["func"].append(curr_func)
                 self.history['weights_diff'].append(np.linalg.norm(w))
                 self.history['epoch_num'].append(curr_epoch)
-            w = w - n*self.loss.grad(X[batchs[i]], y[batchs[i]], w)
+            w = w - n*self.loss.grad(X[batchs[i]], y[batchs[i]], w, intercept=self.fit_intercept)
             n /= (i+1)**self.step_beta
 
         self.w = w

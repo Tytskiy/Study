@@ -15,6 +15,7 @@ _*/
 *.out
 *.fdb_latexmk
 *.gz
+*.pyg
 # C extensions
 *.so
 
